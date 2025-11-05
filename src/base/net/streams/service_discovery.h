@@ -9,9 +9,6 @@
 #include "base/coro/iomanager.h"
 #include "base/util.h"
 
-#define WITH_ZK_CLIENT 1
-#define WITH_REDIS 1
-
 #if WITH_ZK_CLIENT
 #    include "base/net/client/zk_client.h"
 #endif

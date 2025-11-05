@@ -55,7 +55,7 @@ system.txt
 
 # vscode
 tests_log
-.vscode
+# .vscode
 .cache
 
 # conan

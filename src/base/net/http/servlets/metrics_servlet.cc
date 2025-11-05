@@ -1,6 +1,5 @@
 #include "metrics_servlet.h"
 #include <prometheus/text_serializer.h>
-
 namespace base
 {
 namespace http

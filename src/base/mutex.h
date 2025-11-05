@@ -437,7 +437,7 @@ public:
      */
     void rdlock()
     {
-        m_lock.lock_read();
+        m_lock.lock_shared();
         m_isRead = true;
     }
 

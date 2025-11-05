@@ -2,15 +2,40 @@
 
 
 # 编译
-```bash
-sudo apt install libhiredis-dev sqlite3
+ubuntu2204 apt 换源
 
+```
+cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+vim /etc/apt/sources.list
+
+deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+
+apt-get update
+```
+
+
+```bash
+sudo apt install -y libhiredis-dev sqlite3 libtbb-dev
+
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 pip install --upgrade pip
 pip install "urllib3<2.0" "chardet<5.0"
-pip install cocan
+pip install conan
 
+source ~/.profile
 conan profile detect # 创建默认配置文件
-source ~/.profile  # 自己调整 并行构建线程数
+vim ~/.conan2/profiles/default
+# 自己调整 并行构建线程数
 # [conf]
 # tools.build:jobs=2
 source ~/.profile
