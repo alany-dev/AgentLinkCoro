@@ -82,6 +82,23 @@ int ZlibStream::write(ByteArray::ptr ba, size_t length)
     }
 }
 
+int ZlibStream::sendTo(const void *buffer, size_t length, const Address::ptr to, int flags)
+{
+    throw std::logic_error("ZlibStream::sendTo is invalid");
+}
+int ZlibStream::sendTo(const iovec *iov, size_t iovcnt, const Address::ptr to, int flags)
+{
+    throw std::logic_error("ZlibStream::sendTo is invalid");
+}
+int ZlibStream::recvFrom(void *buffer, size_t length, Address::ptr from, int flags)
+{
+    throw std::logic_error("ZlibStream::recvFrom is invalid");
+}
+int ZlibStream::recvFrom(iovec *ba, size_t length, Address::ptr from, int flags)
+{
+    throw std::logic_error("ZlibStream::recvFrom is invalid");
+}
+
 void ZlibStream::close()
 {
     flush();

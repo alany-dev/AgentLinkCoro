@@ -8,7 +8,7 @@
 #include <fstream>
 #include <limits>
 
-namespace weaknet_dbus {
+namespace monitor::weaknet {
 
 static void appendBytes(const void* data, size_t len, std::vector<uint8_t>& out) {
     const uint8_t* p = static_cast<const uint8_t*>(data);
@@ -112,6 +112,6 @@ bool deserializeChangedPayloadFromFile(const std::string& filepath, ChangedPaylo
     return true;
 }
 
-}  // namespace weaknet_dbus
+}  // namespace monitor::weaknet
 
 

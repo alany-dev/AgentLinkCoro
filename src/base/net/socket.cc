@@ -5,6 +5,7 @@
 #include "base/macro.h"
 #include "base/coro/hook.h"
 #include <limits.h>
+#include <memory>
 
 namespace base
 {
@@ -20,7 +21,7 @@ Socket::ptr Socket::CreateUDP(base::Address::ptr address)
 {
     Socket::ptr sock = std::make_shared<Socket>(address->getFamily(), UDP, 0);
     sock->newSock();
-    sock->m_isConnected = true;
+    sock->m_isConnected = sock->isValid();
     return sock;
 }
 
@@ -33,7 +34,7 @@ Socket::ptr Socket::CreateUDPSocket()
 {
     Socket::ptr sock = std::make_shared<Socket>(IPv4, UDP, 0);
     sock->newSock();
-    sock->m_isConnected = true;
+    sock->m_isConnected = sock->isValid();
     return sock;
 }
 
@@ -46,7 +47,7 @@ Socket::ptr Socket::CreateUDPSocket6()
 {
     Socket::ptr sock = std::make_shared<Socket>(IPv6, UDP, 0);
     sock->newSock();
-    sock->m_isConnected = true;
+    sock->m_isConnected = sock->isValid();
     return sock;
 }
 
@@ -57,7 +58,32 @@ Socket::ptr Socket::CreateUnixTCPSocket()
 
 Socket::ptr Socket::CreateUnixUDPSocket()
 {
-    return std::make_shared<Socket>(UNIX, UDP, 0);
+    Socket::ptr sock = std::make_shared<Socket>(UNIX, UDP, 0);
+    return sock;
+}
+
+Socket::ptr Socket::CreateICMPSocket()
+{
+    // 无连接，直接sendto recvfrom
+    Socket::ptr sock = std::make_shared<Socket>(IPv4, RAW, IPPROTO_ICMP);
+    return sock;
+}
+
+Socket::ptr Socket::CreateNetlinkRouteSocket()
+{
+    Socket::ptr sock = std::make_shared<Socket>(NETLINK, UDP, _NETLINK_ROUTE);
+    sock->newSock();
+    sock->m_isConnected = sock->isValid();
+    return sock;
+}
+
+Socket::ptr Socket::CreateNetlinkSockDiagSocket()
+{
+    // 无连接，直接sendto recvfrom
+    Socket::ptr sock = std::make_shared<Socket>(NETLINK, UDP, _NETLINK_SOCK_DIAG);
+    sock->newSock();
+    sock->m_isConnected = sock->isValid();
+    return sock;
 }
 
 Socket::Socket(int family, int type, int protocol)
@@ -90,7 +116,9 @@ int64_t Socket::getSendTimeout()
 
 void Socket::setSendTimeout(int64_t v)
 {
-    struct timeval tv{int(v / 1000), int(v % 1000 * 1000)};
+    struct timeval tv {
+        int(v / 1000), int(v % 1000 * 1000)
+    };
     setOption(SOL_SOCKET, SO_SNDTIMEO, tv);
 }
 
@@ -105,7 +133,9 @@ int64_t Socket::getRecvTimeout()
 
 void Socket::setRecvTimeout(int64_t v)
 {
-    struct timeval tv{int(v / 1000), int(v % 1000 * 1000)};
+    struct timeval tv {
+        int(v / 1000), int(v % 1000 * 1000)
+    };
     setOption(SOL_SOCKET, SO_RCVTIMEO, tv);
 }
 
@@ -192,6 +222,9 @@ bool Socket::bind(const Address::ptr addr)
         return false;
     }
     getLocalAddress();
+    // 标记为“可用”：对于无连接套接字（如 UDP、NETLINK），只要 bind 成功即可进行 sendto/recvfrom。
+    // 即便是 TCP 监听套接字，标记为可用不会影响 accept/listen 的正常使用。
+    m_isConnected = true;
     return true;
 }
 
@@ -291,24 +324,18 @@ int Socket::send(const iovec *buffers, size_t length, int flags)
 
 int Socket::sendTo(const void *buffer, size_t length, const Address::ptr to, int flags)
 {
-    if (isConnected()) {
-        return ::sendto(m_sock, buffer, length, flags, to->getAddr(), to->getAddrLen());
-    }
-    return -1;
+    return ::sendto(m_sock, buffer, length, flags, to->getAddr(), to->getAddrLen());
 }
 
 int Socket::sendTo(const iovec *buffers, size_t length, const Address::ptr to, int flags)
 {
-    if (isConnected()) {
-        msghdr msg;
-        memset(&msg, 0, sizeof(msg));
-        msg.msg_iov = (iovec *)buffers;
-        msg.msg_iovlen = length;
-        msg.msg_name = to->getAddr();
-        msg.msg_namelen = to->getAddrLen();
-        return ::sendmsg(m_sock, &msg, flags);
-    }
-    return -1;
+    msghdr msg;
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_iov = (iovec *)buffers;
+    msg.msg_iovlen = length;
+    msg.msg_name = to->getAddr();
+    msg.msg_namelen = to->getAddrLen();
+    return ::sendmsg(m_sock, &msg, flags);
 }
 
 int Socket::recv(void *buffer, size_t length, int flags)
@@ -333,25 +360,19 @@ int Socket::recv(iovec *buffers, size_t length, int flags)
 
 int Socket::recvFrom(void *buffer, size_t length, Address::ptr from, int flags)
 {
-    if (isConnected()) {
-        socklen_t len = from->getAddrLen();
-        return ::recvfrom(m_sock, buffer, length, flags, from->getAddr(), &len);
-    }
-    return -1;
+    socklen_t len = from->getAddrLen();
+    return ::recvfrom(m_sock, buffer, length, flags, from->getAddr(), &len);
 }
 
 int Socket::recvFrom(iovec *buffers, size_t length, Address::ptr from, int flags)
 {
-    if (isConnected()) {
-        msghdr msg;
-        memset(&msg, 0, sizeof(msg));
-        msg.msg_iov = (iovec *)buffers;
-        msg.msg_iovlen = length;
-        msg.msg_name = from->getAddr();
-        msg.msg_namelen = from->getAddrLen();
-        return ::recvmsg(m_sock, &msg, flags);
-    }
-    return -1;
+    msghdr msg;
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_iov = (iovec *)buffers;
+    msg.msg_iovlen = length;
+    msg.msg_name = from->getAddr();
+    msg.msg_namelen = from->getAddrLen();
+    return ::recvmsg(m_sock, &msg, flags);
 }
 
 Address::ptr Socket::getRemoteAddress()

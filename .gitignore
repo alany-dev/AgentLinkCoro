@@ -60,3 +60,6 @@ tests_log
 
 # conan
 CMakeUserPresets.json
+
+.output
+logs

@@ -123,11 +123,11 @@ namespace ns
         void onTimer();
 
     private:
-        base::RWMutex m_mutex;                ///< 读写锁，用于线程安全
-        std::set<std::string> m_queryDomains; ///< 查询域名集合
-        NSDomainSet::ptr m_domains;           ///< 域名信息缓存
-        uint32_t m_sn = 0;                    ///< 请求序列号
-        base::Timer::ptr m_timer;             ///< 定时器，用于心跳和更新
+        base::RWMutex m_mutex;                // 读写锁，用于线程安全
+        std::set<std::string> m_queryDomains; // 查询域名集合
+        NSDomainSet::ptr m_domains;           // 域名信息缓存
+        uint32_t m_sn = 0;                    // 请求序列号
+        base::Timer::ptr m_timer;             // 定时器，用于心跳和更新
     };
 
 } // namespace ns

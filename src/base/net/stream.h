@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "base/bytearray.h"
+#include "base/net/address.h"
 
 namespace base
 {
@@ -105,6 +106,14 @@ public:
      *      @retval <0 出现流错误
      */
     virtual int writeFixSize(ByteArray::ptr ba, size_t length);
+
+    virtual int sendTo(const void *buffer, size_t length, const Address::ptr to, int flags = 0) = 0;
+
+    virtual int sendTo(const iovec *iov, size_t iovcnt, const Address::ptr to, int flags = 0) = 0;
+
+    virtual int recvFrom(void *buffer, size_t length, Address::ptr from, int flags = 0) = 0;
+
+    virtual int recvFrom(iovec *ba, size_t length, Address::ptr from, int flags = 0) = 0;
 
     /**
      * @brief 关闭流

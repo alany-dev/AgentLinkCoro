@@ -73,6 +73,17 @@ public:
      */
     virtual int write(ByteArray::ptr ba, size_t length) override;
 
+    virtual int sendTo(const void *buffer, size_t length, const Address::ptr to,
+                       int flags = 0) override;
+
+    virtual int sendTo(const iovec *iov, size_t iovcnt, const Address::ptr to,
+                       int flags = 0) override;
+
+    virtual int recvFrom(void *buffer, size_t length, Address::ptr from, int flags = 0) override;
+
+    virtual int recvFrom(iovec *iov, size_t iovcnt, Address::ptr from,
+                         int flags = 0) override;
+
     /**
      * @brief 关闭socket
      */

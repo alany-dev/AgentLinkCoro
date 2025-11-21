@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+#include <linux/netlink.h>
 #include "base/net/address.h"
 #include "base/noncopyable.h"
 
@@ -28,7 +29,9 @@ public:
         /// TCP类型
         TCP = SOCK_STREAM,
         /// UDP类型
-        UDP = SOCK_DGRAM
+        UDP = SOCK_DGRAM,
+        /// RAW类型
+        RAW = SOCK_RAW,
     };
 
     /**
@@ -41,6 +44,16 @@ public:
         IPv6 = AF_INET6,
         /// Unix socket
         UNIX = AF_UNIX,
+        /// Netlink socket
+        NETLINK = AF_NETLINK,
+    };
+
+    enum Protocol {
+        /// 默认协议
+        DEFAULT = 0,
+        /// Netlink socket
+        _NETLINK_SOCK_DIAG = NETLINK_SOCK_DIAG,
+        _NETLINK_ROUTE = NETLINK_ROUTE,
     };
 
     /**
@@ -84,6 +97,12 @@ public:
      * @brief 创建Unix的UDP Socket
      */
     static Socket::ptr CreateUnixUDPSocket();
+
+    static Socket::ptr CreateICMPSocket();
+
+    static Socket::ptr CreateNetlinkRouteSocket();
+
+    static Socket::ptr CreateNetlinkSockDiagSocket();
 
     /**
      * @brief Socket构造函数
@@ -424,7 +443,7 @@ protected:
 
 private:
     std::shared_ptr<SSL_CTX> m_ctx; // SSL上下文，存储SSL配置（如协议版本，证书，私钥）
-    std::shared_ptr<SSL> m_ssl;     // 单个SSL连接，绑定到具体的Socket fd。
+    std::shared_ptr<SSL> m_ssl; // 单个SSL连接，绑定到具体的Socket fd。
 };
 
 /**

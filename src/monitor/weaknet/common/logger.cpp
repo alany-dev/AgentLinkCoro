@@ -5,7 +5,7 @@
 #include <iostream>
 #include <filesystem>
 
-namespace weaknet_dbus {
+namespace monitor::weaknet {
 
 // 静态成员初始化
 bool Logger::initialized_ = false;

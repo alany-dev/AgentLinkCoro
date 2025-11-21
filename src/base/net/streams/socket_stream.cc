@@ -92,6 +92,38 @@ int SocketStream::write(ByteArray::ptr ba, size_t length)
     // }
     // return rrt;
 }
+int SocketStream::sendTo(const void *buffer, size_t length, const Address::ptr to, int flags)
+{
+    if (!m_socket) {
+        return -1;
+    }
+    // UDP是无连接协议，不应该检查连接状态
+    return m_socket->sendTo(buffer, length, to, flags);
+}
+
+int SocketStream::sendTo(const iovec *iov, size_t iovcnt, const Address::ptr to, int flags)
+{
+    if (!m_socket || !iov) {
+        return -1;
+    }
+    return m_socket->sendTo(iov, iovcnt, to, flags);
+}
+
+int SocketStream::recvFrom(void *buffer, size_t length, Address::ptr from, int flags)
+{
+    if (!m_socket) {
+        return -1;
+    }
+    return m_socket->recvFrom(buffer, length, from, flags);
+}
+
+int SocketStream::recvFrom(iovec *iov, size_t iovcnt, Address::ptr from, int flags)
+{
+    if (!m_socket || !iov) {
+        return -1;
+    }
+    return m_socket->recvFrom(iov, iovcnt, from, flags);
+}
 
 void SocketStream::close()
 {

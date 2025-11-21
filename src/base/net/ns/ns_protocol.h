@@ -110,10 +110,10 @@ namespace ns
         std::string toString(const std::string &prefix = "");
 
     private:
-        uint64_t m_id;     ///< 节点唯一标识，由IP和端口生成
-        std::string m_ip;  ///< 节点IP地址
-        uint16_t m_port;   ///< 节点端口号
-        uint32_t m_weight; ///< 节点权重，用于负载均衡
+        uint64_t m_id;     // 节点唯一标识，由IP和端口生成
+        std::string m_ip;  // 节点IP地址
+        uint16_t m_port;   // 节点端口号
+        uint32_t m_weight; // 节点权重，用于负载均衡
     };
 
     /**
@@ -191,9 +191,9 @@ namespace ns
         size_t size();
 
     private:
-        base::RWMutex m_mutex;                   ///< 读写锁，用于线程安全
-        uint32_t m_cmd;                          ///< 命令标识
-        std::map<uint64_t, NSNode::ptr> m_datas; ///< 节点ID到节点信息的映射
+        base::RWMutex m_mutex;                   // 读写锁，用于线程安全
+        uint32_t m_cmd;                          // 命令标识
+        std::map<uint64_t, NSNode::ptr> m_datas; // 节点ID到节点信息的映射
     };
 
     /**
@@ -289,9 +289,9 @@ namespace ns
         size_t size();
 
     private:
-        std::string m_domain;                       ///< 域名
-        base::RWMutex m_mutex;                      ///< 读写锁，用于线程安全
-        std::map<uint32_t, NSNodeSet::ptr> m_datas; ///< 命令标识到节点集合信息的映射
+        std::string m_domain;                       // 域名
+        base::RWMutex m_mutex;                      // 读写锁，用于线程安全
+        std::map<uint32_t, NSNodeSet::ptr> m_datas; // 命令标识到节点集合信息的映射
     };
 
     /**
@@ -359,8 +359,8 @@ namespace ns
         void swap(NSDomainSet &ds);
 
     private:
-        base::RWMutex m_mutex;                        ///< 读写锁，用于线程安全
-        std::map<std::string, NSDomain::ptr> m_datas; ///< 域名到域名信息的映射
+        base::RWMutex m_mutex;                        // 读写锁，用于线程安全
+        std::map<std::string, NSDomain::ptr> m_datas; // 域名到域名信息的映射
     };
 
 } // namespace ns

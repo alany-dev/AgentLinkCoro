@@ -2,7 +2,6 @@
 #include "base/singleton.h"
 #include <iostream>
 #include "base/log/log.h"
-#include "base/db/redis.h"
 #include "base/application/application.h"
 
 static base::Logger::ptr g_logger = _LOG_ROOT();

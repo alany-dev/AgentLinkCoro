@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace weaknet_dbus {
+namespace monitor::weaknet {
 
 // Changed 信号的载荷结构
 struct ChangedPayload {
@@ -45,6 +45,6 @@ bool serializeChangedPayloadToFile(const ChangedPayload& payload, const std::str
 // 从文件反序列化 Changed 信号的载荷
 bool deserializeChangedPayloadFromFile(const std::string& filepath, ChangedPayload* out_payload, std::string* error_message);
 
-}  // namespace weaknet_dbus
+}  // namespace monitor::weaknet
 
 

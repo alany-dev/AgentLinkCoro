@@ -7,7 +7,7 @@
 #include <string>
 #include <memory>
 
-namespace weaknet_dbus {
+namespace monitor::weaknet {
 
 // 日志级别枚举
 enum class LogLevel {
@@ -30,6 +30,7 @@ namespace LogModule {
     constexpr const char* EVENT_MGR = "event_mgr";
     constexpr const char* PING = "ping";
     constexpr const char* INTERFACE = "interface";
+    constexpr const char* TEST = "test";
 }
 
 // 日志初始化类

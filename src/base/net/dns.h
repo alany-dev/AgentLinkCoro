@@ -5,6 +5,7 @@
 #include "base/net/socket.h"
 #include "base/mutex.h"
 #include "base/coro/timer.h"
+#include "dns_client.h"
 #include <set>
 
 namespace base

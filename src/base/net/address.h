@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <linux/rtnetlink.h>
 
 namespace base
 {
@@ -31,6 +32,8 @@ public:
      * @return 返回和sockaddr相匹配的Address,失败返回nullptr
      */
     static Address::ptr Create(const sockaddr *addr, socklen_t addrlen);
+
+    static Address::ptr AsyncLookupAny(const std::string &host, int family);
 
     /**
      * @brief 通过host地址返回对应条件的所有Address
@@ -302,6 +305,53 @@ public:
 private:
     sockaddr_un m_addr;
     socklen_t m_length;
+};
+
+/**
+ * @brief Netlink 地址
+ */
+class NetlinkAddress : public Address
+{
+public:
+    typedef std::shared_ptr<NetlinkAddress> ptr;
+
+    static NetlinkAddress::ptr Create(int groups = 0);
+
+    /**
+     * @brief 通过协议族构造NetlinkAddress
+     * @param[in] groups 组ID，
+       默认0：仅接收 “单播消息”（即直接发送到该进程 nl_pid 的消息）
+       NETLINK_ROUTE：路由/链路/地址/.neighbor 等协议
+            RTNLGRP_LINK：网络接口状态变化（如接口上线 / 下线）。
+            RTNLGRP_IPV4_IFADDR：IPv4 接口地址变化（如新增 / 删除 IP）。
+            RTNLGRP_IPV6_IFADDR：IPv6 接口地址变化。
+            RTNLGRP_NEIGH：邻居表（ARP 表）变化。
+        NETLINK_NETFILTER：网络过滤规则变化。
+            NFNLGRP_CONNTRACK_NEW：新的连接跟踪条目生成。
+            NFNLGRP_CONNTRACK_DESTROY：连接跟踪条目销毁。
+        NETLINK_KOBJECT_UEVENT：内核对象事件（如热插拔事件）。
+            用于设备热插拔、驱动加载等事件通知，多播组通常与设备类相关（如块设备、网络设备等）。
+     */
+    NetlinkAddress(int groups = 0);
+
+    /**
+     * @brief 通过sockaddr_nl构造NetlinkAddress
+     * @param[in] addr sockaddr_nl结构体
+     */
+    NetlinkAddress(const sockaddr_nl &addr);
+
+    const sockaddr *getAddr() const override;
+    sockaddr *getAddr() override;
+    socklen_t getAddrLen() const override;
+    std::ostream &insert(std::ostream &os) const override;
+
+    uint32_t getPortId() const;
+    void setPortId(uint32_t portid);
+    uint32_t getGroups() const;
+    void setGroups(uint32_t groups);
+
+private:
+    sockaddr_nl nladdr;
 };
 
 /**

@@ -44,6 +44,13 @@ mkdir build && cd build
 conan install ..
 conan install .. --build=missing # 有些依赖需要本地构建
 ```
+ebpf 环境
+```bash
+sudo apt update
+sudo apt-get install -y --no-install-recommends \
+    libelf1 libelf-dev zlib1g-dev \
+    make clang llvm
+```
 
 # 技术实现进度
 - ✅ 协程网络库

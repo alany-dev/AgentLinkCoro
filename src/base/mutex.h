@@ -453,7 +453,14 @@ public:
     /**
      * @brief 解锁
      */
-    void unlock() { m_lock.unlock(); }
+    void unlock()
+    {
+        if (m_isRead) {
+            m_lock.unlock_shared();
+        } else {
+            m_lock.unlock();
+        }
+    }
 
 private:
     /// 读写锁
