@@ -11,7 +11,7 @@
 #include "weaknet_client.h"
 #include "logger.hpp"
 
-namespace weaknet_dbus
+namespace monitor::weaknet
 {
 // 全局客户端实例（单例模式）
 static WeakNetClient *g_client = nullptr;
@@ -137,17 +137,17 @@ extern "C" bool weaknet_ping_host(const char *hostname, char *result_buffer, siz
     }
 }
 
-} // namespace weaknet_dbus
+} // namespace monitor::weaknet
 
 // C接口函数实现
 
 // 订阅特定事件类型
 extern "C" bool weaknet_subscribe_event(const char *event_type, weaknet_event_callback_t callback)
 {
-    if (!weaknet_dbus::g_client || !weaknet_dbus::g_client->isConnected()) {
+    if (!monitor::weaknet::g_client || !monitor::weaknet::g_client->isConnected()) {
         return false;
     }
-    return weaknet_dbus::g_client->subscribeToEvent(std::string(event_type));
+    return monitor::weaknet::g_client->subscribeToEvent(std::string(event_type));
 }
 
 // 取消订阅事件（简化实现）
@@ -162,9 +162,9 @@ extern "C" bool weaknet_unsubscribe_event(const char *event_type)
 extern "C" bool weaknet_get_event_types(char *buffer, size_t buffer_size, char *error_buffer,
                                         size_t error_size)
 {
-    snprintf(buffer, buffer_size, "%s,%s,%s", weaknet_dbus::kSignalInterfaceChanged,
-             weaknet_dbus::kSignalConnectionModeChanged,
-             weaknet_dbus::kSignalNetworkQualityChanged);
+    snprintf(buffer, buffer_size, "%s,%s,%s", monitor::weaknet::kSignalInterfaceChanged,
+             monitor::weaknet::kSignalConnectionModeChanged,
+             monitor::weaknet::kSignalNetworkQualityChanged);
     return true;
 }
 
@@ -174,13 +174,13 @@ extern "C" bool weaknet_check_events(char *event_type_buffer, size_t event_type_
                                      char *source_buffer, size_t source_size, char *error_buffer,
                                      size_t error_size)
 {
-    if (!weaknet_dbus::g_client || !weaknet_dbus::g_client->isConnected()) {
+    if (!monitor::weaknet::g_client || !monitor::weaknet::g_client->isConnected()) {
         snprintf(error_buffer, error_size, "客户端未连接");
         return false;
     }
 
     std::string eventType, message, source;
-    if (weaknet_dbus::g_client->checkForEvents(eventType, message, *counter, source)) {
+    if (monitor::weaknet::g_client->checkForEvents(eventType, message, *counter, source)) {
         snprintf(event_type_buffer, event_type_size, "%s", eventType.c_str());
         snprintf(message_buffer, message_size, "%s", message.c_str());
         snprintf(source_buffer, source_size, "%s", source.c_str());
@@ -194,7 +194,7 @@ extern "C" bool weaknet_check_events(char *event_type_buffer, size_t event_type_
 // 检查客户端连接状态
 extern "C" bool weaknet_is_connected()
 {
-    return weaknet_dbus::g_client && weaknet_dbus::g_client->isConnected();
+    return monitor::weaknet::g_client && monitor::weaknet::g_client->isConnected();
 }
 
 // 获取WeakNet客户端库版本信息
@@ -214,7 +214,7 @@ extern "C" bool weaknet_get_build_info(char *buffer, size_t buffer_size)
 // 订阅网络质量事件
 extern "C" bool weaknet_subscribe_network_quality(weaknet_network_quality_callback_t callback)
 {
-    if (!weaknet_dbus::g_client || !weaknet_dbus::g_client->isConnected()) {
+    if (!monitor::weaknet::g_client || !monitor::weaknet::g_client->isConnected()) {
         return false;
     }
 
@@ -230,7 +230,7 @@ extern "C" bool weaknet_subscribe_network_quality(weaknet_network_quality_callba
         return false;
     };
 
-    return weaknet_dbus::g_client->subscribeToNetworkQuality(cpp_callback);
+    return monitor::weaknet::g_client->subscribeToNetworkQuality(cpp_callback);
 }
 
 // 非阻塞检查网络质量事件
@@ -239,21 +239,21 @@ extern "C" bool weaknet_check_network_quality(char *quality_buffer, size_t quali
                                               int32_t *counter, char *error_buffer,
                                               size_t error_size)
 {
-    if (!weaknet_dbus::g_client || !weaknet_dbus::g_client->isConnected()) {
+    if (!monitor::weaknet::g_client || !monitor::weaknet::g_client->isConnected()) {
         snprintf(error_buffer, error_size, "客户端未连接");
         return false;
     }
 
-    if (!weaknet_dbus::g_client->isConnected())
+    if (!monitor::weaknet::g_client->isConnected())
         return false;
 
-    dbus_connection_read_write(weaknet_dbus::g_client->getConnection(), 0); // 非阻塞轮询
-    DBusMessage *msg = dbus_connection_pop_message(weaknet_dbus::g_client->getConnection());
+    dbus_connection_read_write(monitor::weaknet::g_client->getConnection(), 0); // 非阻塞轮询
+    DBusMessage *msg = dbus_connection_pop_message(monitor::weaknet::g_client->getConnection());
     if (!msg)
         return false;
 
-    if (dbus_message_is_signal(msg, weaknet_dbus::kInterface,
-                               weaknet_dbus::kSignalNetworkQualityChanged)) {
+    if (dbus_message_is_signal(msg, monitor::weaknet::kInterface,
+                               monitor::weaknet::kSignalNetworkQualityChanged)) {
         const char *quality = nullptr;
         const char *details = nullptr;
         DBusError e;

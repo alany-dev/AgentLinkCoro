@@ -1,13 +1,9 @@
-// weaknet_client.h
-// WeakNet 客户端动态库 C API 接口
-// 用于与其他程序集成WeakNet监控和事件监听功能
-
-#ifndef WEAKNET_CLIENT_H
-#define WEAKNET_CLIENT_H
+#pragma once
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "logger.hpp"
 
 #ifdef __cplusplus
 extern "C"
@@ -242,8 +238,7 @@ extern "C"
 }
 #endif
 
-
-namespace weaknet_dbus
+namespace monitor::weaknet
 {
 
 class WeakNetClient
@@ -680,6 +675,4 @@ private:
         return member ? std::string(member) : "";
     }
 };
-}
-
-#endif // WEAKNET_CLIENT_H
+} // namespace monitor::weaknet
