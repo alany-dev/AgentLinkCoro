@@ -2,6 +2,8 @@
 
 #include <memory>
 #include "base/bytearray.h"
+#include "base/net/address.h"
+#include "base/mbuffer.h"
 
 namespace base
 {
@@ -105,6 +107,10 @@ public:
      *      @retval <0 出现流错误
      */
     virtual int writeFixSize(ByteArray::ptr ba, size_t length);
+
+    virtual int sendTo(MBuffer::ptr buf, size_t length, Address::ptr addr) = 0;
+
+    virtual int recvFrom(MBuffer::ptr buf, size_t length, Address::ptr addr) = 0;
 
     /**
      * @brief 关闭流

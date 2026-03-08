@@ -93,6 +93,37 @@ int SocketStream::write(ByteArray::ptr ba, size_t length)
     // return rrt;
 }
 
+int SocketStream::sendTo(MBuffer::ptr buf, size_t length, Address::ptr addr)
+{
+    if (!isConnected()) {
+        return -1;
+    }
+    std::vector<iovec> iovs = buf->readBuffers(length);
+    int ret = m_socket->sendTo(&iovs[0], iovs.size(), addr);
+    if (ret >= 0) {
+        _ASSERT((int)length == ret);
+        _ASSERT(length < 1500);
+        buf->consume(ret);
+    }
+    if (ret < 0) {
+        std::cout << "errno: " << errno << " strerrno: " << strerror(errno) << std::endl;
+    }
+    return ret;
+}
+
+int SocketStream::recvFrom(MBuffer::ptr buf, size_t length, Address::ptr addr)
+{
+    if (!isConnected()) {
+        return -1;
+    }
+    std::vector<iovec> iovs = buf->writeBuffers(length);
+    int ret = m_socket->recvFrom(&iovs[0], iovs.size(), addr);
+    if (ret > 0) {
+        buf->product(ret);
+    }
+    return ret;
+}
+
 void SocketStream::close()
 {
     if (m_socket) {

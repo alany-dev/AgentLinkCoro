@@ -8,6 +8,7 @@
 #include <openssl/ssl.h>
 #include "base/net/address.h"
 #include "base/noncopyable.h"
+#include "base/mbuffer.h"
 
 namespace base
 {
@@ -220,6 +221,8 @@ public:
      */
     virtual int sendTo(const void *buffer, size_t length, const Address::ptr to, int flags = 0);
 
+    int sendTo(MBuffer::ptr buf, size_t length, const Address::ptr to, int flags = 0);
+
     /**
      * @brief 发送数据
      * @param[in] buffers 待发送数据的内存(iovec数组)
@@ -269,6 +272,8 @@ public:
      *      @retval <0 socket出错
      */
     virtual int recvFrom(void *buffer, size_t length, Address::ptr from, int flags = 0);
+
+    virtual int recvFrom(MBuffer::ptr buf, size_t length, Address::ptr from, int flags = 0);
 
     /**
      * @brief 接受数据
@@ -424,7 +429,7 @@ protected:
 
 private:
     std::shared_ptr<SSL_CTX> m_ctx; // SSL上下文，存储SSL配置（如协议版本，证书，私钥）
-    std::shared_ptr<SSL> m_ssl;     // 单个SSL连接，绑定到具体的Socket fd。
+    std::shared_ptr<SSL> m_ssl; // 单个SSL连接，绑定到具体的Socket fd。
 };
 
 /**

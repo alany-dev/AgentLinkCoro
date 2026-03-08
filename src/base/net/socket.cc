@@ -90,7 +90,9 @@ int64_t Socket::getSendTimeout()
 
 void Socket::setSendTimeout(int64_t v)
 {
-    struct timeval tv{int(v / 1000), int(v % 1000 * 1000)};
+    struct timeval tv {
+        int(v / 1000), int(v % 1000 * 1000)
+    };
     setOption(SOL_SOCKET, SO_SNDTIMEO, tv);
 }
 
@@ -105,7 +107,9 @@ int64_t Socket::getRecvTimeout()
 
 void Socket::setRecvTimeout(int64_t v)
 {
-    struct timeval tv{int(v / 1000), int(v % 1000 * 1000)};
+    struct timeval tv {
+        int(v / 1000), int(v % 1000 * 1000)
+    };
     setOption(SOL_SOCKET, SO_RCVTIMEO, tv);
 }
 
@@ -207,6 +211,10 @@ bool Socket::reconnect(uint64_t timeout_ms)
 
 bool Socket::connect(const Address::ptr addr, uint64_t timeout_ms)
 {
+    if(addr == nullptr) {
+        _LOG_ERROR(g_logger) << "connect addr is null";
+        return false;
+    }
     m_remoteAddress = addr;
     if (!isValid()) {
         newSock();
@@ -297,6 +305,24 @@ int Socket::sendTo(const void *buffer, size_t length, const Address::ptr to, int
     return -1;
 }
 
+int Socket::sendTo(MBuffer::ptr buf, size_t length, const Address::ptr to, int flags)
+{
+    if (!isConnected()) {
+        return -1;
+    }
+    std::vector<iovec> iovs = buf->readBuffers(length);
+    int ret = ::sendto(m_sock, &iovs[0], iovs.size(), flags, to->getAddr(), to->getAddrLen());
+    if (ret >= 0) {
+        _ASSERT((int)length == ret);
+        _ASSERT(length < 1500);
+        buf->consume(ret);
+    }
+    if (ret < 0) {
+        _LOG_ERROR(g_logger) << "errno: " << errno << " strerrno: " << strerror(errno);
+    }   
+    return ret;
+}
+
 int Socket::sendTo(const iovec *buffers, size_t length, const Address::ptr to, int flags)
 {
     if (isConnected()) {
@@ -338,6 +364,20 @@ int Socket::recvFrom(void *buffer, size_t length, Address::ptr from, int flags)
         return ::recvfrom(m_sock, buffer, length, flags, from->getAddr(), &len);
     }
     return -1;
+}
+
+int Socket::recvFrom(MBuffer::ptr buf, size_t length, Address::ptr from, int flags)
+{
+    if (!isConnected()) {
+        return -1;
+    }
+    std::vector<iovec> iovs = buf->writeBuffers(length);
+    socklen_t len = from->getAddrLen();
+    int ret = ::recvfrom(m_sock, &iovs[0], iovs.size(), flags, from->getAddr(), &len);
+    if (ret > 0) {
+        buf->product(ret);
+    }
+    return ret;
 }
 
 int Socket::recvFrom(iovec *buffers, size_t length, Address::ptr from, int flags)

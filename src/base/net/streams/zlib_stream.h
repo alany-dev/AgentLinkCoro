@@ -48,6 +48,17 @@ public:
     virtual int read(ByteArray::ptr ba, size_t length) override;
     virtual int write(const void *buffer, size_t length) override;
     virtual int write(ByteArray::ptr ba, size_t length) override;
+
+    virtual int sendTo(MBuffer::ptr buf, size_t length, Address::ptr addr) override
+    {
+        throw std::logic_error("ZlibStream::read is invalid");
+    }
+
+    virtual int recvFrom(MBuffer::ptr buf, size_t length, Address::ptr addr) override
+    {
+        throw std::logic_error("ZlibStream::read is invalid");
+    }
+
     virtual void close() override;
 
     int flush();

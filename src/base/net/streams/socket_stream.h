@@ -73,6 +73,10 @@ public:
      */
     virtual int write(ByteArray::ptr ba, size_t length) override;
 
+    virtual int sendTo(MBuffer::ptr buf, size_t length, Address::ptr addr) override;
+
+    virtual int recvFrom(MBuffer::ptr buf, size_t length, Address::ptr addr) override;
+
     /**
      * @brief 关闭socket
      */
